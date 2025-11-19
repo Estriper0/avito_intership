@@ -3,19 +3,27 @@ package config
 import (
 	"fmt"
 	"path"
+	"time"
 
 	"github.com/ilyakaznacheev/cleanenv"
 	"github.com/joho/godotenv"
 )
 
 type Config struct {
-	App AppConfig `yaml:"app"`
-	DB  DBConfig  `yaml:"db"`
+	App    AppConfig
+	Server ServerConfig `yaml:"server"`
+	DB     DBConfig     `yaml:"db"`
 }
 
 type AppConfig struct {
-	Env  string `env:"ENV" env-default:"local"`
-	Port int    `env-required:"true" yaml:"port" env:"APP_PORT"`
+	Env string `env:"ENV" env-default:"local"`
+}
+
+type ServerConfig struct {
+	Port            int           `env-required:"true" yaml:"port" env:"APP_PORT"`
+	ReadTimeout     time.Duration `env-required:"true" yaml:"read_timeout" env:"READ_TIMEOUT"`
+	WriteTimeout    time.Duration `env-required:"true" yaml:"write_timeout" env:"WRITE_TIMEOUT"`
+	ShutdownTimeout time.Duration `env-required:"true" yaml:"shutdown_timeout" env:"SHUTDOWN_TIMEOUT"`
 }
 
 type DBConfig struct {
