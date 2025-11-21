@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/ilyakaznacheev/cleanenv"
-	"github.com/joho/godotenv"
 )
 
 type Config struct {
@@ -32,17 +31,16 @@ type DBConfig struct {
 	User     string `env-required:"true" env:"DB_USER"`
 	Password string `env-required:"true" env:"DB_PASSWORD"`
 	Name     string `env-required:"true" env:"DB_NAME"`
-	PoolSize int    `env-required:"true" yaml:"pool_size" env:"DB_POOL_SIZE"`
+	Url      string `env-required:"true" env:"DB_URL"`
+	PoolSize int32  `env-required:"true" yaml:"pool_size" env:"DB_POOL_SIZE"`
 }
 
 func New(configPath string) *Config {
 	var config Config
 
-	_ = godotenv.Load()
-
 	err := cleanenv.ReadConfig(path.Join("./", configPath), &config)
 	if err != nil {
-		panic(fmt.Sprintf("error reading config: %s", err.Error()))
+		panic(fmt.Sprintf("config:New:ReadConfig - %s", err.Error()))
 	}
 
 	return &config
