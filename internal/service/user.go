@@ -26,7 +26,7 @@ func NewUserService(userRepo repository.IUserRepo, teamRepo repository.ITeamRepo
 }
 
 func (s *UserService) SetIsActive(ctx context.Context, req *dto.SetIsActiveRequest) (*dto.UserResponse, error) {
-	user, err := s.userRepo.UpdateIsActive(ctx, req.UserId, req.IsActive)
+	user, err := s.userRepo.UpdateIsActive(ctx, req.UserId, *req.IsActive)
 	if err != nil {
 		if errors.Is(err, repository.ErrNotFound) {
 			return nil, ErrNotFound
