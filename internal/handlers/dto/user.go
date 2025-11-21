@@ -2,7 +2,7 @@ package dto
 
 type SetIsActiveRequest struct {
 	UserId   string `json:"user_id" validate:"required,max=30"`
-	IsActive bool   `json:"is_active" validate:"required"`
+	IsActive bool  `json:"is_active" validate:"required"`
 }
 
 type UserResponse struct {
@@ -17,4 +17,10 @@ type ReviewResponse struct {
 	PrName   string `json:"pull_request_name"`
 	AuthorId string `json:"author_id"`
 	Status   string `json:"status"`
+}
+
+type UserStatsReviewResponse struct {
+	UserId          string `json:"user_id"`
+	Username        string `json:"username"`
+	CountOpenReview int    `json:"count_open_review"`
 }

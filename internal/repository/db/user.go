@@ -150,3 +150,41 @@ func (r *UserRepo) GetActiveTeamMembersById(ctx context.Context, userId string) 
 
 	return users, nil
 }
+
+func (r *UserRepo) GetStatsReview(ctx context.Context) ([]models.UserStatsReview, error) {
+	query := `
+		SELECT u.user_id, u.username, COUNT(prr.pr_id) 
+		FROM users as u 
+		JOIN pull_requests_reviewers as prr
+		ON u.user_id = prr.user_id
+		JOIN pull_requests as pr
+		ON prr.pr_id = pr.pr_id AND pr.status_id = 1
+		GROUP BY u.user_id, u.username
+	`
+
+	conn := r.getter.DefaultTrOrDB(ctx, r.db)
+	rows, err := conn.Query(ctx, query)
+	if err != nil {
+		return nil, fmt.Errorf("db:UserRepo.GetStatsReview:Query - %s", err.Error())
+	}
+	defer rows.Close()
+
+	var users []models.UserStatsReview
+	for rows.Next() {
+		var user models.UserStatsReview
+		err := rows.Scan(
+			&user.UserId,
+			&user.Username,
+			&user.CountOpenReview,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("db:UserRepo.GetStatsReview:Scan - %s", err.Error())
+		}
+		users = append(users, user)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("db:UserRepo.GetStatsReview:rows - %s", err.Error())
+	}
+
+	return users, nil
+}

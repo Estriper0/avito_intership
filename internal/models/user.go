@@ -6,3 +6,9 @@ type User struct {
 	TeamId   int
 	IsActive bool
 }
+
+type UserStatsReview struct {
+	UserId          string
+	Username        string
+	CountOpenReview int
+}

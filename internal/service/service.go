@@ -9,6 +9,7 @@ import (
 type IUserService interface {
 	SetIsActive(ctx context.Context, req *dto.SetIsActiveRequest) (*dto.UserResponse, error)
 	GetReview(ctx context.Context, userId string) ([]dto.ReviewResponse, error)
+	GetStatsReview(ctx context.Context) ([]dto.UserStatsReviewResponse, error)
 }
 
 type ITeamService interface {

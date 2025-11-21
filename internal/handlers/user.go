@@ -23,6 +23,7 @@ func NewUserHandler(g *gin.RouterGroup, userService service.IUserService, valida
 
 	g.POST("/setIsActive", r.SetIsActive)
 	g.GET("/getReview", r.GetReview)
+	g.GET("/stats/review", r.GetStatsReview)
 }
 
 func (h *UserHandler) SetIsActive(c *gin.Context) {
@@ -72,6 +73,20 @@ func (h *UserHandler) GetReview(c *gin.Context) {
 		gin.H{
 			"user_id":       userId,
 			"pull_requests": pr,
+		},
+	)
+}
+
+func (h *UserHandler) GetStatsReview(c *gin.Context) {
+	resp, err := h.userService.GetStatsReview(c.Request.Context())
+	if err != nil {
+		respondWithError(c, http.StatusInternalServerError, ErrStatusInternal, err)
+		return
+	}
+	c.JSON(
+		http.StatusOK,
+		gin.H{
+			"users": resp,
 		},
 	)
 }

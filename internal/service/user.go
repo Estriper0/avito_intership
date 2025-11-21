@@ -81,3 +81,22 @@ func (s *UserService) GetReview(ctx context.Context, userId string) ([]dto.Revie
 	}
 	return reviews, nil
 }
+
+func (s *UserService) GetStatsReview(ctx context.Context) ([]dto.UserStatsReviewResponse, error) {
+	users, err := s.userRepo.GetStatsReview(ctx)
+	if err != nil {
+		s.logger.Error("UserService.GetStatsReview:userRepo.GetStatsReview - Internal error", slog.String("error", err.Error()))
+		return nil, ErrInternal
+	}
+
+	var resp []dto.UserStatsReviewResponse
+	for _, user := range users {
+		resp = append(resp, dto.UserStatsReviewResponse{
+			UserId:          user.UserId,
+			Username:        user.Username,
+			CountOpenReview: user.CountOpenReview,
+		})
+
+	}
+	return resp, nil
+}
