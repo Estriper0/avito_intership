@@ -24,3 +24,7 @@ type UserStatsReviewResponse struct {
 	Username        string `json:"username"`
 	CountOpenReview int    `json:"count_open_review"`
 }
+
+type MassDeactivation struct {
+	UsersId []string `json:"users_id" validate:"min=1"`
+}

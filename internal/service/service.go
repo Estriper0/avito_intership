@@ -10,6 +10,7 @@ type IUserService interface {
 	SetIsActive(ctx context.Context, req *dto.SetIsActiveRequest) (*dto.UserResponse, error)
 	GetReview(ctx context.Context, userId string) ([]dto.ReviewResponse, error)
 	GetStatsReview(ctx context.Context) ([]dto.UserStatsReviewResponse, error)
+	MassDeactivation(ctx context.Context, req *dto.MassDeactivation) (*dto.MassDeactivation, error)
 }
 
 type ITeamService interface {

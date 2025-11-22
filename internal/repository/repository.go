@@ -13,6 +13,7 @@ type IUserRepo interface {
 	ExistsById(ctx context.Context, userId string) (bool, error)
 	GetActiveTeamMembersById(ctx context.Context, userId string) ([]models.User, error)
 	GetStatsReview(ctx context.Context) ([]models.UserStatsReview, error)
+	MassDeactivation(ctx context.Context, usersId []string) ([]string, error)
 }
 
 type ITeamRepo interface {

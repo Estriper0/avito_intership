@@ -10,6 +10,7 @@ import (
 	trmpgx "github.com/avito-tech/go-transaction-manager/drivers/pgxv5/v2"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/lib/pq"
 )
 
 type UserRepo struct {
@@ -187,4 +188,39 @@ func (r *UserRepo) GetStatsReview(ctx context.Context) ([]models.UserStatsReview
 	}
 
 	return users, nil
+}
+
+func (r *UserRepo) MassDeactivation(ctx context.Context, usersId []string) ([]string, error) {
+	query := `
+		UPDATE users 
+		SET is_active = false
+		WHERE user_id = ANY($1)
+		RETURNING user_id
+	`
+
+	conn := r.getter.DefaultTrOrDB(ctx, r.db)
+	rows, err := conn.Query(ctx, query, pq.Array(usersId))
+	if err != nil {
+		return nil, fmt.Errorf("db:UserRepo.MassDeactivation:Query - %s", err.Error())
+	}
+	defer rows.Close()
+
+	var ids []string
+	for rows.Next() {
+		var id string
+		err := rows.Scan(&id)
+		if err != nil {
+			return nil, fmt.Errorf("db:UserRepo.MassDeactivation:Scan - %s", err.Error())
+		}
+		ids = append(ids, id)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("db:UserRepo.MassDeactivation:rows - %s", err.Error())
+	}
+
+	if len(ids) == 0 {
+		return nil, repository.ErrNotFound
+	}
+
+	return ids, nil
 }

@@ -100,3 +100,18 @@ func (s *UserService) GetStatsReview(ctx context.Context) ([]dto.UserStatsReview
 	}
 	return resp, nil
 }
+
+func (s *UserService) MassDeactivation(ctx context.Context, req *dto.MassDeactivation) (*dto.MassDeactivation, error) {
+	usersId, err := s.userRepo.MassDeactivation(ctx, req.UsersId)
+	if err != nil {
+		if errors.Is(err, repository.ErrNotFound) {
+			return nil, ErrNotFound
+		}
+		s.logger.Error("UserService.MassDeactivation:userRepo.MassDeactivation - Internal error", slog.String("error", err.Error()))
+		return nil, ErrInternal
+	}
+
+	return &dto.MassDeactivation{
+		UsersId: usersId,
+	}, nil
+}

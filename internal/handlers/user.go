@@ -24,6 +24,7 @@ func NewUserHandler(g *gin.RouterGroup, userService service.IUserService, valida
 	g.POST("/setIsActive", r.SetIsActive)
 	g.GET("/getReview", r.GetReview)
 	g.GET("/stats/review", r.GetStatsReview)
+	g.POST("/massDeactivation", r.MassDeactivation)
 }
 
 func (h *UserHandler) SetIsActive(c *gin.Context) {
@@ -88,5 +89,33 @@ func (h *UserHandler) GetStatsReview(c *gin.Context) {
 		gin.H{
 			"users": resp,
 		},
+	)
+}
+
+func (h *UserHandler) MassDeactivation(c *gin.Context) {
+	var req dto.MassDeactivation
+
+	if err := c.Bind(&req); err != nil {
+		respondWithError(c, http.StatusBadRequest, ErrStatusBadRequest, errors.New("invalid request body"))
+		return
+	}
+
+	if err := h.validate.Struct(req); err != nil {
+		respondWithError(c, http.StatusBadRequest, ErrStatusBadRequest, err)
+		return
+	}
+
+	resp, err := h.userService.MassDeactivation(c.Request.Context(), &req)
+	if err != nil {
+		if errors.Is(err, service.ErrNotFound) {
+			respondWithError(c, http.StatusNotFound, ErrStatusNotFound, err)
+			return
+		}
+		respondWithError(c, http.StatusInternalServerError, ErrStatusInternal, err)
+		return
+	}
+	c.JSON(
+		http.StatusOK,
+		resp,
 	)
 }
