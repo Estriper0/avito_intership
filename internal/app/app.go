@@ -48,7 +48,7 @@ func New(logger *slog.Logger, config *config.Config) *App {
 
 	teamService := service.NewTeamService(teamRepo, userRepo, trManager, logger)
 	userService := service.NewUserService(userRepo, teamRepo, prRepo, logger)
-	prService := service.NewPullRequestService(prRepo, userRepo, trManager, logger)
+	prService := service.NewPullRequestService(prRepo, userRepo, teamRepo, trManager, logger)
 
 	teamGroup := router.Group("/team")
 	handlers.NewTeamHandler(teamGroup, teamService, validate)

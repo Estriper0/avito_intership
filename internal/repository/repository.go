@@ -32,4 +32,5 @@ type IPullRequestRepo interface {
 	GetStatusById(ctx context.Context, statusId int) (string, error)
 	GetById(ctx context.Context, prId string) (*models.PullRequest, error)
 	UpdateReviewer(ctx context.Context, prId string, oldReviewer string, newReviewer string) (string, error)
+	GetAllInactiveReviewersByTeam(ctx context.Context, teamId int) ([]models.InactiveReviewers, error)
 }

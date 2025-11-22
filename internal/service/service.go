@@ -23,4 +23,5 @@ type IPullRequestService interface {
 	Create(ctx context.Context, pr *dto.PrCreateRequest) (*dto.PullRequest, error)
 	Merge(ctx context.Context, prId string) (*dto.MergeResponse, error)
 	Reassign(ctx context.Context, req *dto.ReassignRequest) (*dto.ReassignResponse, error)
+	ReassignAllInactiveReviewersByTeam(ctx context.Context, teamName string) ([]dto.MassReassignResponse, error)
 }

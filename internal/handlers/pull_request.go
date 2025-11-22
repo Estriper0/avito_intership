@@ -24,6 +24,7 @@ func NewPullRequestHandler(g *gin.RouterGroup, prService service.IPullRequestSer
 	g.POST("/create", r.Create)
 	g.POST("/merge", r.Merge)
 	g.POST("/reassign", r.Reassign)
+	g.POST("/reassign/team", r.ReassignAllInactiveReviewersByTeam)
 }
 
 func (h *PullRequestHandler) Create(c *gin.Context) {
@@ -121,5 +122,32 @@ func (h *PullRequestHandler) Reassign(c *gin.Context) {
 	c.JSON(
 		http.StatusOK,
 		resp,
+	)
+}
+
+func (h *PullRequestHandler) ReassignAllInactiveReviewersByTeam(c *gin.Context) {
+	teamName, ok := c.GetQuery("team_name")
+	if !ok {
+		respondWithError(c, http.StatusBadRequest, ErrStatusBadRequest, errors.New("invalid query params"))
+		return
+	}
+
+	resp, err := h.prService.ReassignAllInactiveReviewersByTeam(c.Request.Context(), teamName)
+	if err != nil {
+		if errors.Is(err, service.ErrNotFound) {
+			respondWithError(c, http.StatusNotFound, ErrStatusNotFound, err)
+			return
+		} else if errors.Is(err, service.ErrPullRequestMerged) {
+			respondWithError(c, http.StatusConflict, ErrStatusPrMerged, err)
+			return
+		}
+		respondWithError(c, http.StatusInternalServerError, ErrStatusInternal, err)
+		return
+	}
+	c.JSON(
+		http.StatusOK,
+		gin.H{
+			"reassignment": resp,
+		},
 	)
 }

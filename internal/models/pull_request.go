@@ -10,3 +10,8 @@ type PullRequest struct {
 	CreatedAt time.Time
 	MergedAt  time.Time
 }
+
+type InactiveReviewers struct {
+	PrId   string
+	UserId string
+}

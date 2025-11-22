@@ -231,3 +231,36 @@ func (r *PullRequestRepo) UpdateReviewer(ctx context.Context, prId string, oldRe
 
 	return reviewerId, nil
 }
+
+func (r *PullRequestRepo) GetAllInactiveReviewersByTeam(ctx context.Context, teamId int) ([]models.InactiveReviewers, error) {
+	query := `
+		SELECT prr.pr_id, prr.user_id 
+		FROM pull_requests_reviewers as prr
+		JOIN users as u
+		ON u.user_id = prr.user_id AND u.is_active = false AND u.team_id = $1
+	`
+
+	conn := r.getter.DefaultTrOrDB(ctx, r.db)
+	rows, err := conn.Query(ctx, query, teamId)
+	if err != nil {
+		return nil, fmt.Errorf("db:PullRequestRepo.GetAllInactiveReviewersByTeam:Query - %s", err.Error())
+	}
+	defer rows.Close()
+
+	var reviewers []models.InactiveReviewers
+	for rows.Next() {
+		var reviewer models.InactiveReviewers
+		err := rows.Scan(
+			&reviewer.PrId,
+			&reviewer.UserId,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("db:PullRequestRepo.GetAllInactiveReviewersByTeam:Scan - %s", err.Error())
+		}
+		reviewers = append(reviewers, reviewer)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("db:PullRequestRepo.GetAllInactiveReviewersByTeam:rows - %s", err.Error())
+	}
+	return reviewers, nil
+}

@@ -38,3 +38,9 @@ type ReassignResponse struct {
 	PR            *PullRequest `json:"pr"`
 	NewReviewerId string       `json:"replaced_by"`
 }
+
+type MassReassignResponse struct {
+	PrId          string `json:"pull_request_id"`
+	OldReviewerId string `json:"old_reviewer_id"`
+	NewReviewerId string `json:"new_reviewer_id"`
+}

@@ -15,14 +15,16 @@ import (
 type PullRequestService struct {
 	prRepo    repository.IPullRequestRepo
 	userRepo  repository.IUserRepo
+	teamRepo  repository.ITeamRepo
 	trManager *manager.Manager
 	logger    *slog.Logger
 }
 
-func NewPullRequestService(prRepo repository.IPullRequestRepo, userRepo repository.IUserRepo, trManager *manager.Manager, logger *slog.Logger) *PullRequestService {
+func NewPullRequestService(prRepo repository.IPullRequestRepo, userRepo repository.IUserRepo, teamRepo repository.ITeamRepo, trManager *manager.Manager, logger *slog.Logger) *PullRequestService {
 	return &PullRequestService{
 		prRepo:    prRepo,
 		userRepo:  userRepo,
+		teamRepo:  teamRepo,
 		trManager: trManager,
 		logger:    logger,
 	}
@@ -238,4 +240,46 @@ func (s *PullRequestService) Reassign(ctx context.Context, req *dto.ReassignRequ
 		},
 		NewReviewerId: newReviewerId,
 	}, nil
+}
+
+func (s *PullRequestService) ReassignAllInactiveReviewersByTeam(ctx context.Context, teamName string) ([]dto.MassReassignResponse, error) {
+	var resp []dto.MassReassignResponse
+
+	//Do everything in a transaction
+	err := s.trManager.Do(ctx, func(ctx context.Context) error {
+		teamId, err := s.teamRepo.GetIdByName(ctx, teamName)
+		if err != nil {
+			if errors.Is(err, repository.ErrNotFound) {
+				return ErrNotFound
+			}
+			s.logger.Error("PullRequestService.GetAllInactiveReviewersByTeam:teamRepo.GetIdByName - Internal error", slog.String("error", err.Error()))
+			return ErrInternal
+		}
+
+		reviewers, err := s.prRepo.GetAllInactiveReviewersByTeam(ctx, teamId)
+		if err != nil {
+			s.logger.Error("PullRequestService.GetAllInactiveReviewersByTeam:prRepo.GetAllInactiveReviewersByTeam - Internal error", slog.String("error", err.Error()))
+			return ErrInternal
+		}
+		for _, reviewer := range reviewers {
+			newReviewer, err := s.Reassign(ctx, &dto.ReassignRequest{
+				PrId:          reviewer.PrId,
+				OldReviewerId: reviewer.UserId,
+			})
+			if err != nil {
+				if errors.Is(err, ErrNoCandidate){
+					continue
+				}
+				return err
+			}
+			resp = append(resp, dto.MassReassignResponse{
+				PrId:          reviewer.PrId,
+				OldReviewerId: reviewer.UserId,
+				NewReviewerId: newReviewer.NewReviewerId,
+			})
+		}
+		return nil
+	})
+
+	return resp, err
 }
