@@ -81,3 +81,36 @@ func (r *TeamRepo) GetNameById(ctx context.Context, teamId int) (string, error) 
 
 	return teamName, nil
 }
+
+func (r *TeamRepo) GetStatsPRByName(ctx context.Context, teamName string) (*models.TeamStatsPR, error) {
+	query := `
+		SELECT 
+			t.name, 
+			COUNT(pr.status_id),
+			COUNT(pr.status_id) FILTER (WHERE status_id = 1),
+			COUNT(pr.status_id) FILTER (WHERE status_id = 2)
+		FROM teams as t 
+		JOIN users as u
+		ON u.team_id = t.id AND t.name = $1
+		LEFT JOIN pull_requests as pr
+		ON pr.author_id = u.user_id
+		GROUP BY t.name;
+	`
+	var team models.TeamStatsPR
+
+	conn := r.getter.DefaultTrOrDB(ctx, r.db)
+	err := conn.QueryRow(ctx, query, teamName).Scan(
+		&team.Name,
+		&team.TotalPr,
+		&team.OpenPr,
+		&team.MergedPr,
+	)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, repository.ErrNotFound
+		}
+		return nil, fmt.Errorf("db:TeamRepo.GetStatsPR:Query - %s", err.Error())
+	}
+
+	return &team, nil
+}

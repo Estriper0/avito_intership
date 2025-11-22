@@ -93,3 +93,21 @@ func (s *TeamService) Get(ctx context.Context, teamName string) (*dto.Team, erro
 		Members:  members,
 	}, err
 }
+
+func (s *TeamService) GetStatsPR(ctx context.Context, teamName string) (*dto.TeamStatsPrResponse, error) {
+	team, err := s.teamRepo.GetStatsPRByName(ctx, teamName)
+	if err != nil {
+		if errors.Is(err, repository.ErrNotFound) {
+			return nil, ErrNotFound
+		}
+		s.logger.Error("TeamService.GetStatsPR:teamRepo.GetStatsPR - Internal error", slog.String("error", err.Error()))
+		return nil, ErrInternal
+	}
+	
+	return &dto.TeamStatsPrResponse{
+		Name:     team.Name,
+		TotalPr:  team.TotalPr,
+		OpenPr:   team.OpenPr,
+		MergedPr: team.MergedPr,
+	}, nil
+}

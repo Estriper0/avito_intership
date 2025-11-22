@@ -10,3 +10,10 @@ type Members struct {
 	Username string `json:"username" validate:"required,max=30"`
 	IsActive bool   `json:"is_active" validate:"required"`
 }
+
+type TeamStatsPrResponse struct {
+	Name     string `json:"team_name"`
+	TotalPr  int    `json:"total_pull_request"`
+	OpenPr   int    `json:"open_pull_request"`
+	MergedPr int    `json:"merged_pull_request"`
+}

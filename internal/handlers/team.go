@@ -23,6 +23,7 @@ func NewTeamHandler(g *gin.RouterGroup, teamService service.ITeamService, valida
 
 	g.POST("/add", r.Add)
 	g.GET("/get", r.Get)
+	g.GET("/stats/pull_request", r.GetStatsPR)
 }
 
 func (h *TeamHandler) Add(c *gin.Context) {
@@ -76,5 +77,28 @@ func (h *TeamHandler) Get(c *gin.Context) {
 	c.JSON(
 		http.StatusOK,
 		team,
+	)
+}
+
+func (h *TeamHandler) GetStatsPR(c *gin.Context) {
+	teamName, ok := c.GetQuery("team_name")
+	if !ok {
+		respondWithError(c, http.StatusBadRequest, ErrStatusBadRequest, errors.New("invalid query params"))
+		return
+	}
+
+	resp, err := h.teamService.GetStatsPR(c.Request.Context(), teamName)
+	if err != nil {
+		if errors.Is(err, service.ErrNotFound) {
+			respondWithError(c, http.StatusNotFound, ErrStatusNotFound, err)
+			return
+		}
+		respondWithError(c, http.StatusInternalServerError, ErrStatusInternal, err)
+		return
+	}
+
+	c.JSON(
+		http.StatusOK,
+		resp,
 	)
 }

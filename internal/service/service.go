@@ -15,6 +15,7 @@ type IUserService interface {
 type ITeamService interface {
 	Add(ctx context.Context, team *dto.Team) (int, error)
 	Get(ctx context.Context, teamName string) (*dto.Team, error)
+	GetStatsPR(ctx context.Context, teamName string) (*dto.TeamStatsPrResponse, error)
 }
 
 type IPullRequestService interface {

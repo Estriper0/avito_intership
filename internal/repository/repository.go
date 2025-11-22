@@ -19,6 +19,7 @@ type ITeamRepo interface {
 	Create(ctx context.Context, team *models.Team) (int, error)
 	GetIdByName(ctx context.Context, teamName string) (int, error)
 	GetNameById(ctx context.Context, teamId int) (string, error)
+	GetStatsPRByName(ctx context.Context, teamName string) (*models.TeamStatsPR, error)
 }
 
 type IPullRequestRepo interface {
