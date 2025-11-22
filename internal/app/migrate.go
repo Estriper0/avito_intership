@@ -1,6 +1,7 @@
 package app
 
 import (
+	"errors"
 	"fmt"
 	"os"
 
@@ -22,8 +23,8 @@ func init() {
 	}
 	err = m.Up()
 	defer m.Close()
-	
-	if err != nil {
+
+	if err != nil && !errors.Is(err, migrate.ErrNoChange) {
 		panic(fmt.Sprintf("app:init:m.Up - %s", err.Error()))
 	}
 }
