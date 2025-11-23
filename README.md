@@ -36,7 +36,7 @@
     DB_URL=postgres://postgres:12345@postgres:5432/postgres
    ```
 
-3. **Запусти с помощью Docker Compose**:
+3. **Запусти с помощью Make**:
    ```
    make up
    ```
@@ -65,7 +65,7 @@ make test
 1. /team/stats/pull_request - Получаем статистику пул реквестов по командам
 Пример запроса:
 ```bash
-**/team/stats/pull_request?team_name=payments**
+/team/stats/pull_request?team_name=payments
 ```
 
 Пример ответа:
@@ -112,7 +112,7 @@ make test
 4. /pullRequest/reassign/team - Переназначем всех неактивных ревьюеров в команде. Если подходящих кандидатов нет, то оставляем как есть.
 Пример запроса:
 ```bash
-**/pullRequest/reassign/team?team_name=payments**
+/pullRequest/reassign/team?team_name=payments
 ```
 
 Пример ответа:
