@@ -26,5 +26,5 @@ type UserStatsReviewResponse struct {
 }
 
 type MassDeactivation struct {
-	UsersId []string `json:"users_id" validate:"min=1"`
+	UsersId []string `json:"deactivated_users_id" validate:"min=1"`
 }
