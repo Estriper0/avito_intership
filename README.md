@@ -64,7 +64,10 @@ make test
 ### Дополнительно реализовано:
 1. /team/stats/pull_request - Получаем статистику пул реквестов по командам
 Пример запроса:
+```bash
 **/team/stats/pull_request?team_name=payments**
+```
+
 Пример ответа:
 ```json
 {
@@ -108,7 +111,10 @@ make test
 ```
 4. /pullRequest/reassign/team - Переназначем всех неактивных ревьюеров в команде. Если подходящих кандидатов нет, то оставляем как есть.
 Пример запроса:
+```bash
 **/pullRequest/reassign/team?team_name=payments**
+```
+
 Пример ответа:
 ```json
 {
