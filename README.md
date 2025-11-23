@@ -62,57 +62,57 @@ make test
     6. /pullRequest/merge - Операция merge (меняем статус)
     7. /pullRequest/reassign - Переназначаем ревьюера на другого случайного из команды пользователя
 ### Дополнительно реализовано:
-    1. /team/stats/pull_request - Получаем статистику пул реквестов по командам
-    Пример запроса:
-    **/team/stats/pull_request?team_name=payments**
-    Пример ответа:
-    ```json
-    {
-        "team_name": "payments",
-        "total_pull_request": 12,
-        "open_pull_request": 7,
-        "merged_pull_request": 5
-    }
-    ```
-    2. /users/stats/review - Получаем статистику назначенных открытых пул реквестов по пользователям
-    Пример ответа:
-    ```json
-    {
-    "users": [
-            {
-                "user_id": "u045",
-                "username": "Samuel",
-                "count_open_review": 4
-            },
-            {
-                "user_id": "u068",
-                "username": "Piper",
-                "count_open_review": 5
-            }
-        ]
-    }
-    ```
-    3. /users/massDeactivation - Массовая деактивация пользователей (в запросе нужен хотя бы один существующий пользователь, иначе 404)
-    Пример запроса:
-    {
-        "users_id": ["u001", "u002"]
-    }
-    Пример ответа:
-    ```json
-    {
-        "deactivated_users_id": [
-            "u001",
-            "u002"
-        ]
-    }
-    ```
-    4. /pullRequest/reassign/team - Переназначем всех неактивных ревьюеров в команде. Если подходящих кандидатов нет, то оставляем как есть.
-    Пример запроса:
-    **/pullRequest/reassign/team?team_name=payments**
-    Пример ответа:
-    ```json
-    {
-        "message": "The task has been received"
-    }
-    ```
-    Задача ставится в очередь и обрабатывается. В качестве очереди используются каналы (быстрая реализация без RabbitMQ/Kafka). Несколько воркеров читают канал и запускают обработку.
+1. /team/stats/pull_request - Получаем статистику пул реквестов по командам
+Пример запроса:
+**/team/stats/pull_request?team_name=payments**
+Пример ответа:
+```json
+{
+    "team_name": "payments",
+    "total_pull_request": 12,
+    "open_pull_request": 7,
+    "merged_pull_request": 5
+}
+```
+2. /users/stats/review - Получаем статистику назначенных открытых пул реквестов по пользователям
+Пример ответа:
+```json
+{
+"users": [
+        {
+            "user_id": "u045",
+            "username": "Samuel",
+            "count_open_review": 4
+        },
+        {
+            "user_id": "u068",
+            "username": "Piper",
+            "count_open_review": 5
+        }
+    ]
+}
+```
+3. /users/massDeactivation - Массовая деактивация пользователей (в запросе нужен хотя бы один существующий пользователь, иначе 404)
+Пример запроса:
+{
+    "users_id": ["u001", "u002"]
+}
+Пример ответа:
+```json
+{
+    "deactivated_users_id": [
+        "u001",
+        "u002"
+    ]
+}
+```
+4. /pullRequest/reassign/team - Переназначем всех неактивных ревьюеров в команде. Если подходящих кандидатов нет, то оставляем как есть.
+Пример запроса:
+**/pullRequest/reassign/team?team_name=payments**
+Пример ответа:
+```json
+{
+    "message": "The task has been received"
+}
+```
+Задача ставится в очередь и обрабатывается. В качестве очереди используются каналы (быстрая реализация без RabbitMQ/Kafka). Несколько воркеров читают канал и запускают обработку.
