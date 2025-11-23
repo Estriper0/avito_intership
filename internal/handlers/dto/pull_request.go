@@ -4,7 +4,7 @@ import "time"
 
 type PrCreateRequest struct {
 	PrId     string `json:"pull_request_id" validate:"required,max=30"`
-	PrName   string `json:"pull_request_name" validate:"required,max=30"`
+	PrName   string `json:"pull_request_name" validate:"required,max=200"`
 	AuthorId string `json:"author_id" validate:"required,max=30"`
 }
 

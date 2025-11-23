@@ -21,7 +21,7 @@ INSERT INTO pull_requests_statuses (id, status) VALUES
 
 CREATE TABLE IF NOT EXISTS pull_requests (
     pr_id VARCHAR(30) PRIMARY KEY,
-    name VARCHAR(30) NOT NULL,
+    name TEXT NOT NULL,
     author_id VARCHAR(30) NOT NULL REFERENCES users(user_id),
     status_id INTEGER NOT NULL DEFAULT 1 REFERENCES pull_requests_statuses(id),
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
