@@ -49,6 +49,7 @@
 ```bash
 make test
 ```
+Интеграционные тесты для репозиториев.
 
 ---
 
@@ -61,8 +62,12 @@ make test
     5. /pullRequest/create - Создание пул реквеста с назначение 2 случайных ревьюеров из команды автора
     6. /pullRequest/merge - Операция merge (меняем статус)
     7. /pullRequest/reassign - Переназначаем ревьюера на другого случайного из команды пользователя
+
+Структура запросов описана в [openapi.yml](docs/openapi.yml). Дополнительно реализованные запросы пока не описывал.
+
 ### Дополнительно реализовано:
-1. /team/stats/pull_request - Получаем статистику пул реквестов по командам
+1. /team/stats/pull_request - Получаем статистику пул реквестов по командам.
+
 Пример запроса:
 ```bash
 /team/stats/pull_request?team_name=payments
@@ -77,7 +82,9 @@ make test
     "merged_pull_request": 5
 }
 ```
+
 2. /users/stats/review - Получаем статистику назначенных открытых пул реквестов по пользователям
+
 Пример ответа:
 ```json
 {
@@ -95,7 +102,9 @@ make test
     ]
 }
 ```
+
 3. /users/massDeactivation - Массовая деактивация пользователей (в запросе нужен хотя бы один существующий пользователь, иначе 404)
+
 Пример запроса:
 {
     "users_id": ["u001", "u002"]
@@ -109,7 +118,9 @@ make test
     ]
 }
 ```
+
 4. /pullRequest/reassign/team - Переназначем всех неактивных ревьюеров в команде. Если подходящих кандидатов нет, то оставляем как есть.
+
 Пример запроса:
 ```bash
 /pullRequest/reassign/team?team_name=payments
@@ -122,3 +133,12 @@ make test
 }
 ```
 Задача ставится в очередь и обрабатывается. В качестве очереди используются каналы (быстрая реализация без RabbitMQ/Kafka). Несколько воркеров читают канал и запускают обработку.
+
+---
+
+## Для некоторых запросов провел нагрузочное тестирование.
+
+1. [/team/stats/pull_request](docs/team_stats_pr.pdf)
+2. [/team/get](docs/team_get.pdf)
+3. [/pullRequest/reassign/team](docs/pr_reassign_team.pdf)
+4. [/users/setIsActive](docs/user_setisactive.pdf)
