@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"errors"
 	"net/http"
 
@@ -8,18 +9,34 @@ import (
 	"github.com/Estriper0/avito_intership/internal/service"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
+	"github.com/google/uuid"
 )
+
+const (
+	queueCap    int = 10
+	countWorker int = 5
+)
+
+type Task struct {
+	Id       uuid.UUID
+	TeamName string
+}
 
 type PullRequestHandler struct {
 	prService service.IPullRequestService
+	taskQueue chan Task
 	validate  *validator.Validate
 }
 
 func NewPullRequestHandler(g *gin.RouterGroup, prService service.IPullRequestService, validate *validator.Validate) {
 	r := &PullRequestHandler{
 		prService: prService,
+		taskQueue: make(chan Task, queueCap),
 		validate:  validate,
 	}
+
+	//Start workers to handle heavy tasks 
+	startWorkers(r, countWorker)
 
 	g.POST("/create", r.Create)
 	g.POST("/merge", r.Merge)
@@ -132,22 +149,24 @@ func (h *PullRequestHandler) ReassignAllInactiveReviewersByTeam(c *gin.Context) 
 		return
 	}
 
-	resp, err := h.prService.ReassignAllInactiveReviewersByTeam(c.Request.Context(), teamName)
-	if err != nil {
-		if errors.Is(err, service.ErrNotFound) {
-			respondWithError(c, http.StatusNotFound, ErrStatusNotFound, err)
-			return
-		} else if errors.Is(err, service.ErrPullRequestMerged) {
-			respondWithError(c, http.StatusConflict, ErrStatusPrMerged, err)
-			return
-		}
-		respondWithError(c, http.StatusInternalServerError, ErrStatusInternal, err)
-		return
-	}
+	go func() {
+		h.taskQueue <- Task{Id: uuid.New(), TeamName: teamName}
+	}()
+
 	c.JSON(
 		http.StatusOK,
 		gin.H{
-			"reassignment": resp,
+			"message": "The task has been received",
 		},
 	)
+}
+
+func startWorkers(h *PullRequestHandler, workerCount int) {
+	for i := 0; i < workerCount; i++ {
+		go func() {
+			for task := range h.taskQueue {
+				h.prService.ReassignAllInactiveReviewersByTeam(context.Background(), task.TeamName)
+			}
+		}()
+	}
 }
