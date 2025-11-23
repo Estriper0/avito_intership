@@ -65,9 +65,12 @@ func (r *PullRequestRepo) AddReviewers(ctx context.Context, prId string, reviewe
 		if err != nil {
 			var pgErr *pgconn.PgError
 			if errors.As(err, &pgErr) {
-				if pgErr.Code == "23505" {
-					return repository.ErrAlreadyExists
-				}
+				switch pgErr.Code {
+                case "23505":
+                    return repository.ErrAlreadyExists
+                case "23503":
+                    return repository.ErrNotFound
+                }
 			}
 			return fmt.Errorf("db:PullRequestRepo.AddReviewers:Exec - %s", err.Error())
 		}

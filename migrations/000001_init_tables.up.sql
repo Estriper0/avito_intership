@@ -30,7 +30,8 @@ CREATE TABLE IF NOT EXISTS pull_requests (
 
 CREATE TABLE IF NOT EXISTS pull_requests_reviewers (
     pr_id VARCHAR(30) REFERENCES pull_requests(pr_id),
-    user_id VARCHAR(30) REFERENCES users(user_id)
+    user_id VARCHAR(30) REFERENCES users(user_id),
+    PRIMARY KEY(pr_id, user_id)
 );
 
 CREATE INDEX idx_users_team_id ON users(team_id);
