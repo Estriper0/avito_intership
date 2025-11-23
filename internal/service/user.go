@@ -101,7 +101,7 @@ func (s *UserService) GetStatsReview(ctx context.Context) ([]dto.UserStatsReview
 	return resp, nil
 }
 
-func (s *UserService) MassDeactivation(ctx context.Context, req *dto.MassDeactivation) (*dto.MassDeactivation, error) {
+func (s *UserService) MassDeactivation(ctx context.Context, req *dto.MassDeactivationRequest) (*dto.MassDeactivationResponse, error) {
 	usersId, err := s.userRepo.MassDeactivation(ctx, req.UsersId)
 	if err != nil {
 		if errors.Is(err, repository.ErrNotFound) {
@@ -111,7 +111,7 @@ func (s *UserService) MassDeactivation(ctx context.Context, req *dto.MassDeactiv
 		return nil, ErrInternal
 	}
 
-	return &dto.MassDeactivation{
+	return &dto.MassDeactivationResponse{
 		UsersId: usersId,
 	}, nil
 }

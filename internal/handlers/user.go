@@ -93,7 +93,7 @@ func (h *UserHandler) GetStatsReview(c *gin.Context) {
 }
 
 func (h *UserHandler) MassDeactivation(c *gin.Context) {
-	var req dto.MassDeactivation
+	var req dto.MassDeactivationRequest
 
 	if err := c.Bind(&req); err != nil {
 		respondWithError(c, http.StatusBadRequest, ErrStatusBadRequest, errors.New("invalid request body"))
