@@ -20,11 +20,16 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
+const (
+	queueCap int = 10
+)
+
 type App struct {
-	logger *slog.Logger
-	config *config.Config
-	db     *pgxpool.Pool
-	server *server.Server
+	logger    *slog.Logger
+	config    *config.Config
+	db        *pgxpool.Pool
+	server    *server.Server
+	taskQueue chan handlers.Task
 }
 
 func New(logger *slog.Logger, config *config.Config) *App {
@@ -40,6 +45,7 @@ func New(logger *slog.Logger, config *config.Config) *App {
 	}
 
 	trManager := manager.Must(trmpgx.NewDefaultFactory(dbPool))
+	taskQueue := make(chan handlers.Task, queueCap)
 	validate := validator.New()
 
 	teamRepo := db.NewTeamRepo(dbPool, trmpgx.DefaultCtxGetter)
@@ -57,21 +63,23 @@ func New(logger *slog.Logger, config *config.Config) *App {
 	handlers.NewUserHandler(userGroup, userService, validate)
 
 	prGroup := router.Group("pullRequest")
-	handlers.NewPullRequestHandler(prGroup, prService, validate)
+	handlers.NewPullRequestHandler(prGroup, prService, validate, taskQueue)
 
 	server := server.New(router, config)
 
 	return &App{
-		logger: logger,
-		config: config,
-		db:     dbPool,
-		server: server,
+		logger:    logger,
+		config:    config,
+		db:        dbPool,
+		server:    server,
+		taskQueue: taskQueue,
 	}
 }
 
 func (a *App) Run() {
-	//Closing the connection to the database
+	//Closing the connection to the database and task chanel
 	defer a.db.Close()
+	defer close(a.taskQueue)
 
 	a.logger.Info("Start application")
 

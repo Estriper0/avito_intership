@@ -13,7 +13,6 @@ import (
 )
 
 const (
-	queueCap    int = 10
 	countWorker int = 5
 )
 
@@ -28,14 +27,14 @@ type PullRequestHandler struct {
 	validate  *validator.Validate
 }
 
-func NewPullRequestHandler(g *gin.RouterGroup, prService service.IPullRequestService, validate *validator.Validate) {
+func NewPullRequestHandler(g *gin.RouterGroup, prService service.IPullRequestService, validate *validator.Validate, taskQueue chan Task) {
 	r := &PullRequestHandler{
 		prService: prService,
-		taskQueue: make(chan Task, queueCap),
+		taskQueue: taskQueue,
 		validate:  validate,
 	}
 
-	//Start workers to handle heavy tasks 
+	//Start workers to handle heavy tasks
 	startWorkers(r, countWorker)
 
 	g.POST("/create", r.Create)
